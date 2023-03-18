@@ -6,6 +6,7 @@ definePageMeta({
 })
 import {EventStreamContentType, fetchEventSource} from '@microsoft/fetch-event-source'
 import { nextTick } from 'vue'
+import MessageActions from "~/components/MessageActions.vue";
 
 const { $i18n, $auth } = useNuxtApp()
 const runtimeConfig = useRuntimeConfig()
@@ -51,6 +52,14 @@ const abortFetch = () => {
 }
 const fetchReply = async (message, parentMessageId) => {
   ctrl = new AbortController()
+
+  const data = Object.assign({}, currentModel.value, {
+    openaiApiKey: openaiApiKey.value,
+    message: message,
+    parentMessageId: parentMessageId,
+    conversationId: currentConversation.value.id
+  })
+
   try {
     await fetchEventSource('/api/conversation/', {
       signal: ctrl.signal,
@@ -59,13 +68,7 @@ const fetchReply = async (message, parentMessageId) => {
         'accept': 'application/json',
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        model: currentModel.value,
-        openaiApiKey: openaiApiKey.value,
-        message: message,
-        parentMessageId: parentMessageId,
-        conversationId: currentConversation.value.id
-      }),
+      body: JSON.stringify(data),
       onopen(response) {
         if (response.ok && response.headers.get('content-type') === EventStreamContentType) {
           return;
@@ -153,6 +156,10 @@ const usePrompt = (prompt) => {
   editor.value.usePrompt(prompt)
 }
 
+const deleteMessage = (index) => {
+  currentConversation.value.messages.splice(index, 1)
+}
+
 </script>
 
 <template>
@@ -167,9 +174,14 @@ const usePrompt = (prompt) => {
             cols="12"
         >
           <div
-              class="d-flex"
-              :class="message.is_bot ? 'justify-start mr-16' : 'justify-end ml-16'"
+              class="d-flex align-center"
+              :class="message.is_bot ? 'justify-start' : 'justify-end'"
           >
+            <MessageActions
+                v-if="!message.is_bot"
+                :message="message"
+                :message-index="index"
+            />
             <v-card
                 :color="message.is_bot ? '' : 'primary'"
                 rounded="lg"
@@ -178,18 +190,12 @@ const usePrompt = (prompt) => {
               <v-card-text>
                 <MsgContent :content="message.message" />
               </v-card-text>
-
-<!--              <v-card-actions-->
-<!--                  v-if="message.is_bot"-->
-<!--              >-->
-<!--                <v-spacer></v-spacer>-->
-<!--                <v-tooltip text="Copy">-->
-<!--                  <template v-slot:activator="{ props }">-->
-<!--                    <v-btn v-bind="props" icon="content_copy"></v-btn>-->
-<!--                  </template>-->
-<!--                </v-tooltip>-->
-<!--              </v-card-actions>-->
             </v-card>
+            <MessageActions
+                v-if="message.is_bot"
+                :message="message"
+                :message-index="index"
+            />
           </div>
         </v-col>
       </v-row>

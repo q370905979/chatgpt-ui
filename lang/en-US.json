@@ -18,10 +18,20 @@
   "feedback": "Feedback",
   "newConversation": "New conversation",
   "clearConversations": "Clear conversations",
+  "modelParameters": "Model Parameters",
+  "model": "Model",
+  "temperature": "Temperature",
+  "topP": "Top P",
+  "frequencyPenalty": "Frequency Penalty",
+  "presencePenalty": "Presence Penalty",
+  "maxTokens": "Max Tokens",
   "roles": {
     "me": "Me",
     "ai": "AI"
   },
+  "copy": "Copy",
+  "copied": "Copied",
+  "delete": "Delete",
   "welcomeScreen": {
     "introduction1": "is an unofficial client for ChatGPT, but uses the official OpenAI API.",
     "introduction2": "You will need an OpenAI API Key before you can use this client.",
